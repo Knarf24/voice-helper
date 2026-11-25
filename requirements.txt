@@ -1,0 +1,4 @@
+# The web page needs nothing installed: Python runs in the browser (Pyodide).
+# desktop.py only (both optional; without them you type and read):
+SpeechRecognition
+pyttsx3

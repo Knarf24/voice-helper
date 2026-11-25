@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multilingual Voice Helper</title>
+  <meta name="description" content="Ask a question out loud in your own language and hear the answer: facts from Wikipedia, weather, sums, the time, and translations. Written in Python, running in your browser.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🎙️ Multilingual Voice Helper</h1>
+    <p class="lead">Many people can't easily type, read small print, or use English-only search. Here you <b>ask out loud in
+      your own language</b> (isiZulu, isiXhosa, Afrikaans, Swahili, French and more) and <b>hear the answer</b> in that language:
+      facts from Wikipedia, today's weather, sums, the time and date, or how to say a phrase in another language.</p>
+    <p class="py">🐍 The helper's brain is Python running right here in your browser with Pyodide.
+      Listening and speaking use your browser's built-in voice.</p>
+  </header>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div>
+      <b id="loadText">Starting Python…</b>
+      <div class="small">First visit downloads about 12 MB (Python). Later visits are faster.</div>
+    </div>
+  </div>
+
+  <main id="app" class="app">
+    <section class="card talk">
+      <div class="row">
+        <label for="lang">I speak</label>
+        <select id="lang" disabled></select>
+        <span id="voiceNote" class="small"></span>
+      </div>
+
+      <div class="micwrap">
+        <button id="mic" class="mic" disabled aria-label="Tap and ask a question">
+          <span class="mic-ico">🎤</span>
+        </button>
+        <div id="micText" class="mic-text">Tap the microphone and ask a question</div>
+        <div id="interim" class="interim" aria-live="polite"></div>
+      </div>
+
+      <form id="typeForm" class="typeform">
+        <input id="typed" type="text" placeholder="…or type your question here" autocomplete="off" disabled>
+        <button id="send" type="submit" disabled>Ask</button>
+      </form>
+
+      <div class="examples">
+        <span class="small">Try:</span>
+        <button class="chip" data-q="Who was Nelson Mandela?" data-lang="en">Who was Nelson Mandela?</button>
+        <button class="chip" data-q="Translate good morning to Zulu" data-lang="en">Translate good morning to Zulu</button>
+        <button class="chip" data-q="What's the weather in Durban?" data-lang="en">Weather in Durban</button>
+        <button class="chip" data-q="What is 15 percent of 240?" data-lang="en">15 percent of 240</button>
+        <button class="chip" data-q="Ubani uNelson Mandela?" data-lang="zu">🇿🇦 Ubani uNelson Mandela?</button>
+        <button class="chip" data-q="Qu'est-ce qu'un trou noir ?" data-lang="fr">🇫🇷 Qu'est-ce qu'un trou noir ?</button>
+      </div>
+    </section>
+
+    <section class="card chat">
+      <div class="chat-top">
+        <h3>Conversation</h3>
+        <div class="controls">
+          <label class="small" title="How fast the answer is read">Speed
+            <input id="rate" type="range" min="0.6" max="1.4" step="0.1" value="1"></label>
+          <label class="small"><input id="speakOn" type="checkbox" checked> Read answers aloud</label>
+          <button id="stop" class="ghost" type="button">⏹ Stop</button>
+          <button id="clear" class="ghost" type="button">Clear</button>
+        </div>
+      </div>
+      <div id="log" class="log" aria-live="polite">
+        <p class="empty small">Your questions and the helper's answers appear here.</p>
+      </div>
+    </section>
+  </main>
+
+  <section class="card wide how">
+    <h3>How it works</h3>
+    <ol>
+      <li><b>Listen:</b> your browser turns your speech into text in the language you picked
+        (GeeksforGeeks <i>Speech Recognition</i>).</li>
+      <li><b>Translate in:</b> Python sends the words to the free MyMemory translator to get English
+        (GeeksforGeeks <i>Language Translator</i>).</li>
+      <li><b>Understand:</b> Python works out what you want: a fact, a translation, the weather, a sum, or the time.
+        Sums are worked out safely by Python itself.</li>
+      <li><b>Look it up:</b> facts come from Wikipedia (GeeksforGeeks <i>Voice Search Wikipedia</i>),
+        weather from Open-Meteo.</li>
+      <li><b>Translate out and speak:</b> the answer is translated back to your language and read aloud
+        (GeeksforGeeks <i>Text to Speech</i>).</li>
+    </ol>
+    <p class="small"><b>Works best in Chrome, Edge or Safari.</b> Firefox can't listen yet, but typing and reading
+      aloud still work. Whether an answer can be read aloud in a language depends on the voices installed on your device;
+      if there is none, the answer is shown as text.</p>
+    <p class="small">🔒 <b>Privacy:</b> nothing is saved. To answer, your question is sent to the translator, Wikipedia or
+      Open-Meteo, and in Chrome and Edge the browser's speech recognition sends your voice to the browser maker's servers.</p>
+    <p class="small">Source code: <a href="https://github.com/Knarf24/voice-helper">github.com/Knarf24/voice-helper</a></p>
+  </section>
+
+  <script src="pyodide/pyodide.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
