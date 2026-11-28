@@ -18,11 +18,11 @@
       Listening and speaking use your browser's built-in voice.</p>
   </header>
 
-  <div id="loading" class="loading">
+  <div id="loading" class="loading slim" role="status">
     <div class="spinner"></div>
     <div>
-      <b id="loadText">Starting Python…</b>
-      <div class="small">First visit downloads about 12 MB (Python). Later visits are faster.</div>
+      <b id="loadText">Starting Python in the background…</b>
+      <div class="small">The first visit downloads Python once (about 12 MB). After that it is saved on this device.</div>
     </div>
   </div>
 
@@ -30,7 +30,7 @@
     <section class="card talk">
       <div class="row">
         <label for="lang">I speak</label>
-        <select id="lang" disabled></select>
+        <select id="lang" disabled><option value="en">English</option></select>
         <span id="voiceNote" class="small"></span>
       </div>
 
@@ -43,8 +43,8 @@
       </div>
 
       <form id="typeForm" class="typeform">
-        <input id="typed" type="text" placeholder="…or type your question here" autocomplete="off" disabled>
-        <button id="send" type="submit" disabled>Ask</button>
+        <input id="typed" type="text" placeholder="…or type your question here" autocomplete="off">
+        <button id="send" type="submit">Ask</button>
       </form>
 
       <div class="examples">
@@ -98,6 +98,7 @@
   </section>
 
   <script src="pyodide/pyodide.js"></script>
+  <script src="pyfast.js"></script>
   <script type="module" src="main.js"></script>
 </body>
 </html>
