@@ -2,7 +2,7 @@
 const $ = (id) => document.getElementById(id);
 
 let py = null, answerJson = null;
-let languages = [];
+let languages = [{ code: "en", name: "English", native: "English", tag: "en-US" }]; // the full list comes from Python
 let busy = false;
 let listening = false;
 let recognizer = null;
@@ -11,15 +11,22 @@ const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const synth = window.speechSynthesis;
 
 // ---------- start-up ----------
+// Python starts in the background while the page is already usable; asking waits for it if needed.
+let pyReady = null;
 async function startPython() {
-  py = await loadPyodide({ indexURL: new URL("pyodide/", location.href).href });
-  $("loadText").textContent = "Loading the helper…";
-  const code = await fetch("helper.py").then((r) => { if (!r.ok) throw new Error("helper.py missing"); return r.text(); });
+  let code;
+  [py, code] = await Promise.all([
+    loadPyodideFast(),
+    fetch("helper.py").then((r) => { if (!r.ok) throw new Error("helper.py missing"); return r.text(); }),
+  ]);
   py.FS.writeFile("/home/pyodide/helper.py", code);
   py.runPython("import helper");
   const helper = py.pyimport("helper");
   answerJson = helper.answer_json;
   languages = JSON.parse(helper.languages_json());
+  fillLanguages();
+  updateVoiceNote();
+  $("lang").disabled = false;
 }
 
 function fillLanguages() {
@@ -124,13 +131,14 @@ function localIso() {
 
 async function ask(question) {
   question = question.trim();
-  if (!question || busy || !answerJson) return;
+  if (!question || busy) return;
   busy = true; setBusy(true);
-  const lang = $("lang").value;
   const me = addMessage("me", esc(question));
-  me.lang = langInfo(lang).tag;
   const bot = addMessage("bot typing", "Thinking…");
   try {
+    await pyReady;
+    const lang = $("lang").value;
+    me.lang = langInfo(lang).tag;
     const res = JSON.parse(await answerJson(question, lang, localIso()));
     if (lang !== "en" && res.heard_en && res.heard_en.toLowerCase() !== question.toLowerCase()) {
       me.insertAdjacentHTML("beforeend", `<span class="sub">English: ${esc(res.heard_en)}</span>`);
@@ -214,19 +222,21 @@ function wire() {
 
 (async () => {
   wire();
+  setBusy(false);
+  pyReady = startPython();
+  document.documentElement.dataset.ui = "ready";
+  const q = new URLSearchParams(location.search).get("q");
+  if (q) ask(q);
   try {
-    await startPython();
-    fillLanguages();
-    updateVoiceNote();
-    for (const el of ["lang", "typed", "send"]) $(el).disabled = false;
-    setBusy(false);
+    await pyReady;
     $("loading").hidden = true;
-    const q = new URLSearchParams(location.search).get("q");
-    if (q) ask(q);
+    document.documentElement.dataset.py = "ready";
   } catch (e) {
     console.error(e);
     $("loading").classList.add("error");
     $("loadText").textContent = "Couldn't start Python: " + e.message + ". Please reload the page.";
     document.querySelector(".spinner")?.remove();
   }
+  // Keeps Python saved on this device so the next visit starts without downloading it (see sw.js).
+  if ("serviceWorker" in navigator && isSecureContext) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
